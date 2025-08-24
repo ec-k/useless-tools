@@ -1,9 +1,7 @@
 package useless
 
 import (
-	"fmt"
 	"math/rand"
-	"os"
 	"slices"
 )
 
@@ -28,12 +26,9 @@ func randomizeString(raw_string string) string {
 	return string(randomizedString)
 }
 
-func parseArgs() string {
-	return os.Args[1]
-}
+type Randomizer struct{}
 
-func main(){
-	var inputString string = parseArgs()
-	fmt.Println(randomizeString(inputString))
+func (r Randomizer) Process(input string) (output string, err error) {
+	result := randomizeString(input)
+	return result, nil
 }
-
