@@ -5,11 +5,11 @@ import (
 	"slices"
 )
 
-func createCharacterSet(s string) []rune {
-	runes := []rune(s)
-	slices.Sort(runes)
-	unique := slices.Compact(runes)
-	return unique
+type Randomizer struct{}
+
+func (r Randomizer) Process(input string) (output string, err error) {
+	result := randomizeString(input)
+	return result, nil
 }
 
 func randomizeString(raw_string string) string {
@@ -26,9 +26,9 @@ func randomizeString(raw_string string) string {
 	return string(randomizedString)
 }
 
-type Randomizer struct{}
-
-func (r Randomizer) Process(input string) (output string, err error) {
-	result := randomizeString(input)
-	return result, nil
+func createCharacterSet(s string) []rune {
+	runes := []rune(s)
+	slices.Sort(runes)
+	unique := slices.Compact(runes)
+	return unique
 }
