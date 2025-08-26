@@ -17,6 +17,8 @@ import (
 	"os/signal"
 	"strings"
 
+	"useless-tools/useless"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -37,13 +39,33 @@ func interactionAuthor(i *discordgo.Interaction) *discordgo.User {
 	return i.User
 }
 
-func handleProcess(s *discordgo.Session, i *discordgo.InteractionCreate, opts optionMap) {
+func handleEcho(s *discordgo.Session, i *discordgo.InteractionCreate, opts optionMap) {
 	builder := new(strings.Builder)
 	if v, ok := opts["author"]; ok && v.BoolValue() {
 		author := interactionAuthor(i.Interaction)
 		builder.WriteString("**" + author.String() + "** says: ")
 	}
 	builder.WriteString(opts["message"].StringValue())
+
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: builder.String(),
+		},
+	})
+
+	if err != nil {
+		log.Panicf("could not respond to interaciton: %s", err)
+	}
+}
+
+func handleRandomize(s *discordgo.Session, i *discordgo.InteractionCreate, opts optionMap) {
+	builder := new(strings.Builder)
+
+	randomizer := useless.Randomizer{}
+	randomizedString, _ := randomizer.Process(opts["message"].StringValue())
+
+	builder.WriteString(randomizedString)
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -75,6 +97,18 @@ var commands = []*discordgo.ApplicationCommand{
 			},
 		},
 	},
+	{
+		Name: "randomize",
+		Description: "Randomize input string",
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Name:        "message",
+				Description: "Contents of the message",
+				Type:        discordgo.ApplicationCommandOptionString,
+				Required:    true,
+			},
+		},
+	},
 }
 
 var (
@@ -100,10 +134,15 @@ func main() {
 			return
 		}
 		data := i.ApplicationCommandData()
-		if data.Name != "echo" {
+
+		switch data.Name {
+		case "echo":
+			handleEcho(s, i, parseOptions(data.Options))
+		case "randomize":
+			handleRandomize(s, i, parseOptions(data.Options))
+		default:
 			return
 		}
-		handleProcess(s, i, parseOptions(data.Options))
 	})
 
 	session.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
