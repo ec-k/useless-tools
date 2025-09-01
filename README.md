@@ -11,7 +11,7 @@
 
 ## License
 
-This project is primarily licensed under [The Unlicense](LICENSE).
+This project is primarily licensed under [Do What The Fuck You Want To Public License (WTFPL)](LICENSE).
 
 However, please note that some components of this project, particularly code adapted
 from the `discordgo` library (e.g., in `host/cmd/discordbot/main.go`),
